@@ -1,11 +1,12 @@
 import requests
 from flask import Flask, request, render_template
+import os
 
 app = Flask(__name__)
 
 # Function to get weather data using the Current Weather Data API
 def get_weather(city):
-    api_key = "06dffbeb7c0c4a146315d3323ac03c57"
+    api_key = os.getenv("OPENWEATHER_API_KEY") 
     weather_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
     
     # Get the weather data
