@@ -3,24 +3,20 @@ from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
-# Function to get weather data using OpenWeather One Call API 3.0
+# Function to get weather data using the Current Weather Data API
 def get_weather(city):
     api_key = "06dffbeb7c0c4a146315d3323ac03c57"
-    geocoding_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city}&appid={api_key}"
+    weather_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
     
-    # Get the latitude and longitude for the city
-    geo_response = requests.get(geocoding_url).json()
-    
-    if len(geo_response) > 0:
-        lat = geo_response[0]['lat']
-        lon = geo_response[0]['lon']
-        
-        # Call the One Call API 3.0 with the lat/lon coordinates
-        weather_url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units=metric&appid={api_key}"
-        weather_response = requests.get(weather_url).json()
-        return weather_response
-    else:
-        return {"cod": "404", "message": "City not found"}
+    # Get the weather data
+    weather_response = requests.get(weather_url).json()
+
+    # Return the response
+    return weather_response
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/weather', methods=['POST'])
 def weather():
@@ -31,18 +27,18 @@ def weather():
     print(weather_data)
 
     # Check if the API response contains the expected keys
-    if weather_data and "current" in weather_data:
+    if weather_data and "main" in weather_data:
         try:
-            current = weather_data["current"]
-            weather = current["weather"][0]
-            wind = current["wind_speed"]
+            main = weather_data["main"]
+            weather = weather_data["weather"][0]
+            wind = weather_data["wind"]["speed"]
 
             # Weather details to pass to the frontend
             data = {
                 "city": city,
-                "temperature": current["temp"],
-                "feels_like": current["feels_like"],
-                "humidity": current["humidity"],
+                "temperature": main["temp"],
+                "feels_like": main["feels_like"],
+                "humidity": main["humidity"],
                 "description": weather["description"],
                 "wind_speed": wind
             }
